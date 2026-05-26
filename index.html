@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEC Super Calculator</title>
+<style>
+  :root{
+    --navy:#1A2B3C; --blue:#2980B9; --accent:#2E5F8A;
+    --bg:#F5F6FA; --line:#D5D8DC; --ink:#2b3742; --muted:#6b7785;
+    --bank:#2E5F8A; --super:#1f9d6b; --gst:#9a7b25;
+    --noteb:#FAEEDA; --notebd:#E6C988; --notetx:#7a5a12;
+    --infob:#EBF3FA; --infobd:#B0C4D8; --infotx:#2E5F8A;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:560px;margin:0 auto;padding:20px 16px 48px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;
+    box-shadow:0 2px 14px rgba(26,43,60,.06)}
+  .head{background:var(--navy);color:#fff;padding:22px 22px 20px}
+  .head .brand{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#9fb6cc;margin:0 0 6px}
+  .head h1{font-size:20px;margin:0;font-weight:700}
+  .head p{margin:6px 0 0;font-size:13px;color:#c8d4e0}
+  .body{padding:22px}
+  label.fld{display:block;font-size:13px;font-weight:600;color:var(--navy);margin:0 0 7px}
+  .hint{font-size:12px;color:var(--muted);margin:4px 0 0}
+  .amount{position:relative}
+  .amount span{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:18px}
+  input[type=number]{width:100%;font-size:20px;padding:13px 14px 13px 30px;border:1.5px solid var(--line);
+    border-radius:10px;outline:none;color:var(--ink);-moz-appearance:textfield}
+  input[type=number]:focus{border-color:var(--blue)}
+  input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  select{width:100%;font-size:16px;padding:13px 14px;border:1.5px solid var(--line);border-radius:10px;
+    outline:none;color:var(--ink);background:#fff;-webkit-appearance:none;appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236b7785' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat:no-repeat;background-position:right 14px center}
+  select:focus{border-color:var(--blue)}
+  .row{margin-top:20px}
+  .toggle{display:flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+  .toggle button{flex:1;padding:12px;background:#fff;border:none;font-size:14px;font-weight:600;
+    color:var(--muted);cursor:pointer;transition:.15s}
+  .toggle button.on{background:var(--accent);color:#fff}
+  .rate-row{display:flex;align-items:flex-end;gap:12px;margin-top:20px}
+  .rate-row.off{opacity:.45;pointer-events:none}
+  .rate-row .ratebox{width:120px}
+  .rate-inp{position:relative}
+  .rate-inp span{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted)}
+  .rate-inp input{padding-left:14px;padding-right:30px;font-size:18px}
+  .rate-note{font-size:12px;color:var(--muted);flex:1;padding-bottom:13px}
+  .results{margin-top:26px;border-top:1px solid var(--line);padding-top:8px}
+  .line{display:flex;justify-content:space-between;align-items:center;padding:13px 2px;border-bottom:1px solid #eef0f4}
+  .line .lab{font-size:14px;color:var(--ink)}
+  .line .sub{font-size:11.5px;color:var(--muted);display:block;margin-top:2px}
+  .line .val{font-size:17px;font-weight:600;white-space:nowrap}
+  .pill{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;vertical-align:middle}
+  .bank .val{color:var(--bank)} .pill.bank{background:var(--bank)}
+  .super .val{color:var(--super)} .pill.super{background:var(--super)}
+  .gst .val{color:var(--gst)} .pill.gst{background:var(--gst)}
+  .total{margin-top:6px;background:var(--bg);border:1px solid var(--line);border-radius:10px;
+    padding:14px 14px;display:flex;justify-content:space-between;align-items:center}
+  .total .lab{font-weight:700;color:var(--navy);font-size:14px}
+  .total .val{font-weight:700;color:var(--navy);font-size:18px}
+  .bar{display:flex;height:14px;border-radius:7px;overflow:hidden;margin:18px 0 4px;background:#eef0f4}
+  .bar i{display:block;height:100%}
+  .bar i.bank{background:var(--bank)} .bar i.super{background:var(--super)} .bar i.gst{background:var(--gst)}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:8px}
+  .legend span .pill{width:8px;height:8px}
+  .note{margin-top:18px;border-radius:10px;padding:13px 15px;font-size:12.5px;line-height:1.55}
+  .note.warn{background:var(--noteb);border:1px solid var(--notebd);color:var(--notetx)}
+  .note.info{background:var(--infob);border:1px solid var(--infobd);color:var(--infotx)}
+  .note b{font-weight:700}
+  .foot{font-size:11.5px;color:var(--muted);margin:22px 0 0;padding-top:16px;border-top:1px solid var(--line)}
+  .foot a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="head">
+      <p class="brand">Melbourne Entertainment Company</p>
+      <h1>Super Calculator</h1>
+      <p>See how a payment splits between your bank account and your super fund.</p>
+    </div>
+    <div class="body">
+
+      <label class="fld" for="entity">My entity structure</label>
+      <select id="entity">
+        <option value="sole" selected>Individual / Sole Trader</option>
+        <option value="partnership">Partnership</option>
+        <option value="company">Company (Pty Ltd)</option>
+        <option value="trust">Trust</option>
+      </select>
+      <p class="hint">Not sure? Check your ABN at abr.business.gov.au — it shows your registered type.</p>
+
+      <div class="row">
+        <label class="fld" for="amt">Invoice total ($)</label>
+        <div class="amount">
+          <span>$</span>
+          <input id="amt" type="number" min="0" step="0.01" inputmode="decimal" placeholder="400" value="400">
+        </div>
+        <p class="hint" id="amtHint">Enter the total on your invoice. If you charge GST, include it (e.g. $440 = $400 + $40 GST).</p>
+      </div>
+
+      <div class="row">
+        <label class="fld">Are you registered for GST?</label>
+        <div class="toggle" id="gstToggle">
+          <button data-gst="no" class="on">No</button>
+          <button data-gst="yes">Yes</button>
+        </div>
+      </div>
+
+      <div class="rate-row" id="rateRow">
+        <div class="ratebox">
+          <label class="fld" for="rate">Super rate</label>
+          <div class="rate-inp">
+            <input id="rate" type="number" min="0" step="0.5" inputmode="decimal" value="12">
+            <span>%</span>
+          </div>
+        </div>
+        <div class="rate-note">Standard rate is 12%. Only change this if you've agreed a higher rate with MEC.</div>
+      </div>
+
+      <div class="results" id="results"></div>
+
+      <div class="bar" id="bar"></div>
+      <div class="legend" id="legend"></div>
+
+      <div id="entityNote"></div>
+
+      <p class="foot">
+        Illustrative only — general information, not financial advice. Super is calculated on your fee
+        excluding GST. GST is yours to remit to the ATO via your BAS as normal. Genuine expense
+        reimbursements (e.g. accommodation, parking with receipts) aren't included in earnings and aren't
+        shown here.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  var gstRegistered = false;
+
+  var amt = document.getElementById('amt');
+  var rate = document.getElementById('rate');
+  var hint = document.getElementById('amtHint');
+  var toggle = document.getElementById('gstToggle');
+  var entity = document.getElementById('entity');
+  var rateRow = document.getElementById('rateRow');
+
+  toggle.addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    gstRegistered = b.dataset.gst === 'yes';
+    [].forEach.call(toggle.children, function(x){ x.classList.toggle('on', x===b); });
+    hint.textContent = gstRegistered
+      ? "Enter the total including GST (e.g. $550 = $500 fee + $50 GST). Super is worked out on the $500."
+      : "Enter the total on your invoice. If you charge GST, include it (e.g. $440 = $400 + $40 GST).";
+    render();
+  });
+  amt.addEventListener('input', render);
+  rate.addEventListener('input', render);
+  entity.addEventListener('change', render);
+
+  function money(n){
+    return '$' + (Math.round(n*100)/100).toLocaleString('en-AU',{minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  function render(){
+    var ent = entity.value;
+    var superApplies = (ent === 'sole' || ent === 'partnership');
+
+    // grey out the rate input when super doesn't apply
+    rateRow.classList.toggle('off', !superApplies);
+
+    var total = parseFloat(amt.value) || 0;
+    var r = (parseFloat(rate.value) || 0) / 100;
+    var exGst = gstRegistered ? total / 1.1 : total;
+    var gst = gstRegistered ? total - exGst : 0;
+    var superAmt = superApplies ? exGst * r : 0;
+    var cash = exGst - superAmt;          // cash portion to bank
+    var bankTotal = cash + gst;           // what actually lands in the bank
+
+    var pctCash = total>0 ? cash/total*100 : 0;
+    var pctSuper = total>0 ? superAmt/total*100 : 0;
+    var pctGst = total>0 ? gst/total*100 : 0;
+    var rp = Math.round(r*100);
+
+    var rows = '';
+    rows += line('bank', 'Cash to your bank', superApplies ? (100-rp)+'% of your fee' : 'Your full fee (ex-GST)', money(cash));
+    if(gstRegistered) rows += line('gst', 'GST', 'You remit this to the ATO via BAS', money(gst));
+    rows += line('super', 'To your super fund', superApplies ? rp+'% of your fee (ex-GST)' : 'No super applies', money(superAmt));
+    rows += '<div class="total"><div class="lab">Total landing in your bank</div>'
+          + '<div class="val">'+money(bankTotal)+'</div></div>';
+    document.getElementById('results').innerHTML = rows;
+
+    document.getElementById('bar').innerHTML =
+        '<i class="bank" style="width:'+pctCash+'%"></i>'
+      + '<i class="gst" style="width:'+pctGst+'%"></i>'
+      + '<i class="super" style="width:'+pctSuper+'%"></i>';
+
+    var leg = '<span><i class="pill bank"></i>Bank (cash)</span>';
+    if(gstRegistered) leg += '<span><i class="pill gst"></i>GST (to ATO)</span>';
+    if(superApplies)  leg += '<span><i class="pill super"></i>Super fund</span>';
+    document.getElementById('legend').innerHTML = leg;
+
+    // entity-specific notes
+    var note = '';
+    if(ent === 'partnership'){
+      note = '<div class="note warn"><b>** Partnerships — it depends how you’re booked.</b> '
+           + 'Performing as a <b>solo act</b> under your partnership ABN, super is deducted as shown above. '
+           + 'Performing as a <b>duo or larger group</b>, MEC currently does <b>not</b> deduct super on that booking '
+           + '— we’re still seeking clarification on how this should be handled, and we’ll let you know before anything changes.</div>';
+    } else if(ent === 'company' || ent === 'trust'){
+      var label = ent === 'company' ? 'a company (Pty Ltd)' : 'a trust';
+      note = '<div class="note info"><b>No super applies.</b> Payments made to '+label+' aren’t subject to the super '
+           + 'obligation, so your full fee (ex-GST) lands in your bank — shown above for comparison. '
+           + 'Some performers weigh this up when thinking about their business structure. Running a company or trust '
+           + 'has its own costs and obligations, so please speak with your accountant before making any change.</div>';
+    }
+    document.getElementById('entityNote').innerHTML = note;
+  }
+
+  function line(cls, lab, sub, val){
+    return '<div class="line '+cls+'"><div class="lab"><span class="pill '+cls+'"></span>'+lab
+      + '<span class="sub">'+sub+'</span></div><div class="val">'+val+'</div></div>';
+  }
+
+  render();
+</script>
+</body>
+</html>
