@@ -130,10 +130,11 @@
       <div id="entityNote"></div>
 
       <p class="foot">
-        Illustrative only — general information, not financial advice. Super is calculated on your fee
-        excluding GST. GST is yours to remit to the ATO via your BAS as normal. Genuine expense
-        reimbursements (e.g. accommodation, parking with receipts) aren't included in earnings and aren't
-        shown here.
+        Illustrative only — general information, not financial advice. Your fee is treated as inclusive of
+        super: the cash to your bank is your fee (excluding GST) divided by 1.12, and the super is the
+        remainder — so super sits within the fee rather than being added on top. GST is yours to remit to
+        the ATO via your BAS as normal. Genuine expense reimbursements (e.g. accommodation, parking with
+        receipts) aren't included in earnings and aren't shown here.
       </p>
     </div>
   </div>
@@ -177,8 +178,8 @@
     var r = (parseFloat(rate.value) || 0) / 100;
     var exGst = gstRegistered ? total / 1.1 : total;
     var gst = gstRegistered ? total - exGst : 0;
-    var superAmt = superApplies ? exGst * r : 0;
-    var cash = exGst - superAmt;          // cash portion to bank
+    var superAmt = superApplies ? exGst - exGst/(1+r) : 0;   // fee is super-inclusive: base = fee / (1+rate)
+    var cash = exGst - superAmt;          // cash portion to bank = fee / (1+rate)
     var bankTotal = cash + gst;           // what actually lands in the bank
 
     var pctCash = total>0 ? cash/total*100 : 0;
@@ -187,9 +188,9 @@
     var rp = Math.round(r*100);
 
     var rows = '';
-    rows += line('bank', 'Cash to your bank', superApplies ? (100-rp)+'% of your fee' : 'Your full fee (ex-GST)', money(cash));
+    rows += line('bank', 'Cash to your bank', superApplies ? 'Your fee ÷ '+(1+r).toFixed(2)+' (ex-GST)' : 'Your full fee (ex-GST)', money(cash));
     if(gstRegistered) rows += line('gst', 'GST', 'You remit this to the ATO via BAS', money(gst));
-    rows += line('super', 'To your super fund', superApplies ? rp+'% of your fee (ex-GST)' : 'No super applies', money(superAmt));
+    rows += line('super', 'To your super fund', superApplies ? rp+'% super, included within your fee' : 'No super applies', money(superAmt));
     rows += '<div class="total"><div class="lab">Total landing in your bank</div>'
           + '<div class="val">'+money(bankTotal)+'</div></div>';
     document.getElementById('results').innerHTML = rows;
