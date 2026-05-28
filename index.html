@@ -189,7 +189,7 @@
     var rows = '';
     rows += line('bank', 'Cash to your bank', superApplies ? 'Gross Total Agreed Rate inc. super ÷ '+(1+r).toFixed(2)+' (ex-GST)' : 'Your full Gross Total Agreed Rate inc. super (ex-GST)', money(cash));
     if(gstRegistered) rows += line('gst', 'GST', 'You remit this to the ATO via BAS', money(gst));
-    rows += line('super', 'To your super fund', superApplies ? rp+'% super, included in the Gross Total Agreed Rate inc. super' : 'No super applies', money(superAmt));
+    rows += line('super', 'To your super fund', superApplies ? rp+'% super, included in the Gross Total Agreed Rate' : 'No super applies', money(superAmt));
     rows += '<div class="total"><div class="lab">Total landing in your bank</div>'
           + '<div class="val">'+money(bankTotal)+'</div></div>';
     document.getElementById('results').innerHTML = rows;
