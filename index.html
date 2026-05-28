@@ -79,7 +79,6 @@
 <div class="wrap">
   <div class="card">
     <div class="head">
-      <p class="brand">Melbourne Entertainment Company</p>
       <h1>Super Calculator</h1>
       <p>See how a payment splits between your bank account and your super fund.</p>
     </div>
@@ -100,7 +99,7 @@
           <span>$</span>
           <input id="amt" type="number" min="0" step="0.01" inputmode="decimal" placeholder="400" value="400">
         </div>
-        <p class="hint" id="amtHint">Enter the total on your invoice. If you charge GST, include it (e.g. $440 = $400 + $40 GST).</p>
+        <p class="hint" id="amtHint">Enter the Gross Total Agreed Rate inc. super on your invoice. If you charge GST, include it (e.g. $440 = $400 + $40 GST).</p>
       </div>
 
       <div class="row">
@@ -115,7 +114,7 @@
         <div class="ratebox">
           <label class="fld" for="rate">Super rate</label>
           <div class="rate-inp">
-            <input id="rate" type="number" min="0" step="0.5" inputmode="decimal" value="12">
+            <input id="rate" type="number" min="12" step="0.5" inputmode="decimal" value="12">
             <span>%</span>
           </div>
         </div>
@@ -130,11 +129,11 @@
       <div id="entityNote"></div>
 
       <p class="foot">
-        Illustrative only — general information, not financial advice. Your fee is treated as inclusive of
-        super: the cash to your bank is your fee (excluding GST) divided by 1.12, and the super is the
-        remainder — so super sits within the fee rather than being added on top. GST is yours to remit to
-        the ATO via your BAS as normal. Genuine expense reimbursements (e.g. accommodation, parking with
-        receipts) aren't included in earnings and aren't shown here.
+        Illustrative only — general information, not financial advice. Your Gross Total Agreed Rate inc.
+        super means just that — inclusive of super: the cash to your bank is that figure (excluding GST)
+        divided by 1.12, and the super is the remainder. GST is yours to remit to the ATO via your BAS as
+        normal. Genuine expense reimbursements (e.g. accommodation, parking with receipts) aren't included in
+        earnings and aren't shown here.
       </p>
     </div>
   </div>
@@ -155,8 +154,8 @@
     gstRegistered = b.dataset.gst === 'yes';
     [].forEach.call(toggle.children, function(x){ x.classList.toggle('on', x===b); });
     hint.textContent = gstRegistered
-      ? "Enter the total including GST (e.g. $550 = $500 fee + $50 GST). Super is worked out on the $500."
-      : "Enter the total on your invoice. If you charge GST, include it (e.g. $440 = $400 + $40 GST).";
+      ? "Enter the Gross Total Agreed Rate inc. super (incl. GST) on your invoice (e.g. $550 = $500 + $50 GST). Super is worked out on the $500."
+      : "Enter the Gross Total Agreed Rate inc. super on your invoice. If you charge GST, include it (e.g. $440 = $400 + $40 GST).";
     render();
   });
   amt.addEventListener('input', render);
@@ -169,7 +168,7 @@
 
   function render(){
     var ent = entity.value;
-    var superApplies = (ent === 'sole' || ent === 'partnership');
+    var superApplies = (ent === 'sole');
 
     // grey out the rate input when super doesn't apply
     rateRow.classList.toggle('off', !superApplies);
@@ -188,9 +187,9 @@
     var rp = Math.round(r*100);
 
     var rows = '';
-    rows += line('bank', 'Cash to your bank', superApplies ? 'Your fee ÷ '+(1+r).toFixed(2)+' (ex-GST)' : 'Your full fee (ex-GST)', money(cash));
+    rows += line('bank', 'Cash to your bank', superApplies ? 'Gross Total Agreed Rate inc. super ÷ '+(1+r).toFixed(2)+' (ex-GST)' : 'Your full Gross Total Agreed Rate inc. super (ex-GST)', money(cash));
     if(gstRegistered) rows += line('gst', 'GST', 'You remit this to the ATO via BAS', money(gst));
-    rows += line('super', 'To your super fund', superApplies ? rp+'% super, included within your fee' : 'No super applies', money(superAmt));
+    rows += line('super', 'To your super fund', superApplies ? rp+'% super, included in the Gross Total Agreed Rate inc. super' : 'No super applies', money(superAmt));
     rows += '<div class="total"><div class="lab">Total landing in your bank</div>'
           + '<div class="val">'+money(bankTotal)+'</div></div>';
     document.getElementById('results').innerHTML = rows;
@@ -207,16 +206,11 @@
 
     // entity-specific notes
     var note = '';
-    if(ent === 'partnership'){
-      note = '<div class="note warn"><b>** Partnerships — it depends how you’re booked.</b> '
-           + 'Performing as a <b>solo act</b> under your partnership ABN, super is deducted as shown above. '
-           + 'Performing as a <b>duo or larger group</b>, MEC currently does <b>not</b> deduct super on that booking '
-           + '— we’re still seeking clarification on how this should be handled, and we’ll let you know before anything changes.</div>';
-    } else if(ent === 'company' || ent === 'trust'){
-      var label = ent === 'company' ? 'a company (Pty Ltd)' : 'a trust';
+    if(ent === 'company' || ent === 'trust' || ent === 'partnership'){
+      var label = ent === 'company' ? 'a company (Pty Ltd)' : (ent === 'trust' ? 'a trust' : 'a partnership');
       note = '<div class="note info"><b>No super applies.</b> Payments made to '+label+' aren’t subject to the super '
-           + 'obligation, so your full fee (ex-GST) lands in your bank — shown above for comparison. '
-           + 'Some performers weigh this up when thinking about their business structure. Running a company or trust '
+           + 'obligation, so your full Gross Total Agreed Rate inc. super (ex-GST) lands in your bank — shown above for comparison. '
+           + 'Some performers weigh this up when thinking about their business structure. Running a company, partnership, or trust '
            + 'has its own costs and obligations, so please speak with your accountant before making any change.</div>';
     }
     document.getElementById('entityNote').innerHTML = note;
